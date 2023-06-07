@@ -12,6 +12,19 @@ const config = {
     domains: ['images.clerk.dev'],
   },
 
+  // experimental: {
+  //   isrMemoryCacheSize: 0,
+  //   isrFlushToDisk: false,
+  //   swcPlugins: [
+  //     [
+  //       'next-superjson-plugin',
+  //       {
+  //         excluded: [],
+  //       },
+  //     ],
+  //   ],
+  // },
+
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
    * out.

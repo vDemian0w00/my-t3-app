@@ -22,6 +22,8 @@
     "@upstash/redis": "^1.21.0",
     "dayjs": "^1.11.8",
     "next": "^13.4.2",
+    "next-json": "^0.2.2",
+    "next-superjson-plugin": "^0.5.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.4.1",

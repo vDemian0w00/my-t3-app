@@ -5,21 +5,11 @@ import {
   publicProcedure,
 } from '@/server/api/trpc'
 import { clerkClient } from '@clerk/nextjs'
-import { User } from '@clerk/nextjs/dist/types/server'
 import { TRPCError } from '@trpc/server'
 import { Ratelimit } from '@upstash/ratelimit' // for deno: see above
 import { Redis } from '@upstash/redis'
-
-const filterUserForClient = (user: User) => {
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username,
-    pfp: user.profileImageUrl,
-    emails: user.emailAddresses,
-  }
-}
+import { filterUserForClient } from '@/utils/helpers'
+import { Post } from '@prisma/client'
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -27,6 +17,30 @@ const ratelimit = new Ratelimit({
   analytics: true,
   prefix: '@upstash/ratelimit',
 })
+
+const addUsersToPosts = async (posts: Post[]) => {
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: posts.map((post) => post.userId),
+      limit: 100,
+    })
+  ).map(filterUserForClient)
+
+  return posts.map((post) => {
+    const foundUser = users.find((user) => user.id === post.userId)
+
+    if (!foundUser || !foundUser.username)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'User not found',
+      })
+
+    return {
+      post,
+      user: { ...foundUser, username: foundUser.username },
+    }
+  })
+}
 
 export const postRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -39,27 +53,7 @@ export const postRouter = createTRPCRouter({
       ],
     })
 
-    const users = (
-      await clerkClient.users.getUserList({
-        userId: posts.map((post) => post.userId),
-        limit: 100,
-      })
-    ).map(filterUserForClient)
-
-    return posts.map((post) => {
-      const foundUser = users.find((user) => user.id === post.userId)
-
-      if (!foundUser || !foundUser.username)
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'User not found',
-        })
-
-      return {
-        post,
-        user: { ...foundUser, username: foundUser.username },
-      }
-    })
+    return addUsersToPosts(posts)
   }),
 
   create: privateProcedure
@@ -87,5 +81,36 @@ export const postRouter = createTRPCRouter({
       })
 
       return post
+    }),
+
+  getPostByUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const user = await clerkClient.users.getUser(input.userId)
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found',
+        })
+      }
+
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          userId: input.userId,
+        },
+        take: 100,
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+        ],
+      })
+
+      return addUsersToPosts(posts)
     }),
 })

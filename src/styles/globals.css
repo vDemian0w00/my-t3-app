@@ -4,4 +4,9 @@
 
 body {
   @apply bg-black font-light text-slate-300;
+
+  overscroll-behavior: none;
+  /* // hide scroll bar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
