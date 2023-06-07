@@ -5,9 +5,12 @@ import { SignInButton, useUser, SignOutButton } from '@clerk/nextjs'
 import { api } from '@/utils/api'
 
 const Home: NextPage = (props) => {
-  const hello = api.example.hello.useQuery({ text: 'from tRPC' })
-
+  const data = api.post.getAll.useQuery()
   const user = useUser()
+
+  console.log({
+    post: data.data,
+  })
 
   return (
     <>
@@ -18,6 +21,24 @@ const Home: NextPage = (props) => {
       </Head>
       <main className='flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]'>
         {user.isSignedIn ? <SignOutButton /> : <SignInButton />}
+        {user.user ? (
+          <div className='text-white'>
+            <p>Hi {user.user.username}</p>
+            <p>Your email is {user.user.emailAddresses[0]?.emailAddress}</p>
+          </div>
+        ) : null}
+        {data.data && data.data.length > 0 ? (
+          <div className='text-white'>
+            <h1 className='text-3xl font-bold'>Posts</h1>
+            <ul>
+              {data.data.map((post) => (
+                <li key={post.id}>{post.content}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className='text-white'>No posts available.</div>
+        )}
       </main>
     </>
   )
