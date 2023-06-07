@@ -29,7 +29,12 @@ const addUsersToPosts = async (posts: Post[]) => {
   return posts.map((post) => {
     const foundUser = users.find((user) => user.id === post.userId)
 
-    if (!foundUser || !foundUser.username)
+    console.log({
+      post,
+      foundUser,
+    })
+
+    if (!foundUser)
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'User not found',
@@ -37,7 +42,11 @@ const addUsersToPosts = async (posts: Post[]) => {
 
     return {
       post,
-      user: { ...foundUser, username: foundUser.username },
+      user: {
+        ...foundUser,
+        username:
+          foundUser.username ?? `${foundUser.firstName} ${foundUser.lastName}`,
+      },
     }
   })
 }
