@@ -2,7 +2,8 @@ import { LoadingSpinner, Spinner } from '@/components/Spinner'
 import { PageLayout } from '@/components/layout'
 import PostView from '@/components/postview'
 import { api } from '@/utils/api'
-import { SignInButton, useUser } from '@clerk/nextjs'
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { type NextPage } from 'next'
@@ -38,14 +39,24 @@ const CreatePostWizard = () => {
   if (!user) return null
 
   return (
-    <div className='flex w-full gap-3 p-2'>
-      <Image
+    <div className='flex h-full w-full gap-3 p-2'>
+      <UserButton
+        userProfileMode='navigation'
+        appearance={{
+          baseTheme: dark,
+          elements: {
+            formButtonPrimary:
+              'bg-transparent text-violet-100 hover:text-violet-200 rounded-md px-2 text-2xl w-20 h-20',
+          },
+        }}
+      ></UserButton>
+      {/* <Image
         src={user.profileImageUrl}
         alt='Profile picture'
         className='h-20 w-20 rounded-full'
         width={80}
         height={80}
-      />
+      /> */}
       <input
         placeholder='Type some idea!'
         className='grow bg-transparent text-violet-100 outline-none placeholder:text-violet-200'
@@ -62,7 +73,7 @@ const CreatePostWizard = () => {
       />
       {content !== '' && !isPosting ? (
         <button
-          className='rounded-md px-2 text-2xl text-violet-50 hover:text-violet-200'
+          className='animate-bounce rounded-md px-2 text-2xl text-violet-50 transition-all hover:text-violet-200 '
           onClick={handleSubmit}
           disabled={isPosting}
         >

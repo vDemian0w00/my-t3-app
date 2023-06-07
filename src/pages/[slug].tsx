@@ -17,7 +17,7 @@ import Image from 'next/image'
 import PostView from '@/components/postview'
 
 const ProfileFeed = ({ userId }: { userId: string }) => {
-  const { data, isLoading } = api.post.getPostByUserId.useQuery({
+  const { data, isLoading } = api.post.getPostsByUserId.useQuery({
     userId,
   })
 
@@ -35,7 +35,7 @@ const ProfileFeed = ({ userId }: { userId: string }) => {
 }
 
 const ProfilePage: NextPage<{ slug: string }> = (
-  props: InferGetStaticPropsType<typeof getStaticProps>,
+  props: InferGetStaticPropsType<typeof getStaticProps>
 ) => {
   const { data, isLoading: userLoading } =
     api.profiles.getUserByUsername.useQuery({

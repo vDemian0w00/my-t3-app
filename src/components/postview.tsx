@@ -8,7 +8,11 @@ dayjs.extend(relativeTime)
 
 type PostWithUser = RouterOutputs['post']['getAll'][number]
 
-const PostView = (props: PostWithUser) => {
+const PostView = (
+  props: PostWithUser & {
+    noRedirect?: boolean
+  },
+) => {
   const { post, user } = props
   return (
     <div
@@ -27,11 +31,17 @@ const PostView = (props: PostWithUser) => {
           <Link href={`/@${user.username}`}>
             <span className='hover:text-violet-400'>{`@${user.username}`}</span>
           </Link>{' '}
-          <Link href={`/post/${post.id}`}>
+          {props.noRedirect ? (
             <span className='hover:text-violet-400'>{`· ${dayjs(
               post.createdAt,
             ).fromNow()}`}</span>
-          </Link>
+          ) : (
+            <Link href={`/post/${post.id}`}>
+              <span className='hover:text-violet-400'>{`· ${dayjs(
+                post.createdAt,
+              ).fromNow()}`}</span>
+            </Link>
+          )}
         </div>
         <span className='text-2xl'>{post.content}</span>
       </div>
