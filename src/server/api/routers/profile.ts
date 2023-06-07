@@ -15,16 +15,25 @@ export const profileRouter = createTRPCRouter({
     .input(
       z.object({
         // starts with @
-        username: z.string().min(1),
+        username: z.string().min(1).optional(),
+        firstName: z.string().min(1).optional(),
         // .regex(/^@/, 'Username must start with @'),
       }),
     )
     .query(async ({ input }) => {
-      const userTrimmed = input.username.replace(/^@/, '')
+      const userTrimmed = input.username?.replace(/^@/, '')
 
-      const [user] = await getUsersList({
-        username: [userTrimmed],
-      })
+      console.log({ userTrimmed })
+
+      const [user] = await getUsersList(
+        userTrimmed
+          ? {
+              username: [userTrimmed],
+            }
+          : {
+              // emailAddress
+            },
+      )
 
       if (!user) {
         throw new TRPCError({
