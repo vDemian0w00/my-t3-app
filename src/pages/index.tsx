@@ -1,9 +1,9 @@
+import { RouterOutputs, api } from '@/utils/api'
+import { SignInButton, useUser } from '@clerk/nextjs'
 import { type NextPage } from 'next'
 import Head from 'next/head'
-import Link from 'next/link'
-import { SignInButton, useUser, SignOutButton } from '@clerk/nextjs'
-import { RouterOutputs, api } from '@/utils/api'
 
+import { LoadingSpinner } from '@/components/Spinner'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Image from 'next/image'
@@ -59,11 +59,32 @@ const PostView = (props: PostWithUser) => {
   )
 }
 
-const Home: NextPage = (props) => {
+const Feed = () => {
   const data = api.post.getAll.useQuery()
+  if (data.isLoading || true) return <LoadingSpinner />
+
+  if (!data.data) return null
+
+  return (
+    <div className='flex'>
+      {data.data.length === 0 ? (
+        <div className='text-white'>No posts available.</div>
+      ) : (
+        <div className='flex w-full flex-col'>
+          {data.data.map((fullPost) => (
+            <PostView {...fullPost} key={fullPost.post.id} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const Home: NextPage = (props) => {
+  api.post.getAll.useQuery()
   const user = useUser()
 
-  if (!data.data || data.isLoading) return <div>Loading...</div>
+  if (!user.isLoaded) return <LoadingSpinner />
 
   return (
     <>
@@ -77,17 +98,7 @@ const Home: NextPage = (props) => {
           <div className='flex justify-center border-b border-slate-400 px-1 py-4'>
             {user.isSignedIn ? <CreatePostWizard /> : <SignInButton />}
           </div>
-          <div className='flex'>
-            {data.data.length === 0 ? (
-              <div className='text-white'>No posts available.</div>
-            ) : (
-              <div className='flex w-full flex-col'>
-                {data.data.map((fullPost) => (
-                  <PostView {...fullPost} key={fullPost.post.id} />
-                ))}
-              </div>
-            )}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
