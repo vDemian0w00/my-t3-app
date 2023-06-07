@@ -8,6 +8,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import Image from 'next/image'
 import { useCallback, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import Link from 'next/link'
 dayjs.extend(relativeTime)
 
 const CreatePostWizard = () => {
@@ -96,8 +97,12 @@ const PostView = (props: PostWithUser) => {
       />
       <div className='flex flex-col '>
         <div className='flex gap-2 text-violet-200 hover:cursor-pointer hover:text-violet-400'>
-          <span>{`@${user.username}`}</span>{' '}
-          <span>{`· ${dayjs(post.createdAt).fromNow()}`}</span>
+          <Link href={`/@${user.username}`}>
+            <span>{`@${user.username}`}</span>
+          </Link>{' '}
+          <Link href={`/post/${post.id}`}>
+            <span>{`· ${dayjs(post.createdAt).fromNow()}`}</span>
+          </Link>
         </div>
         <span className='text-2xl'>{post.content}</span>
       </div>
