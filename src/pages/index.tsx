@@ -7,11 +7,27 @@ import { LoadingSpinner } from '@/components/Spinner'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Image from 'next/image'
+import { useCallback, useState } from 'react'
 dayjs.extend(relativeTime)
 
 const CreatePostWizard = () => {
   const { user } = useUser()
-  console.log(user)
+
+  const [content, setContent] = useState('')
+
+  const handleSubmit = useCallback(() => {
+    if (!content || content.trim() === '') return
+    mutate({ content })
+  }, [content])
+
+  const ctx = api.useContext()
+
+  const { mutate, isLoading: isPosting } = api.post.create.useMutation({
+    onSuccess: () => {
+      setContent('')
+      ctx.post.getAll.invalidate()
+    },
+  })
 
   if (!user) return null
 
@@ -27,7 +43,18 @@ const CreatePostWizard = () => {
       <input
         placeholder='Type some idea!'
         className='grow bg-transparent text-violet-100 outline-none placeholder:text-violet-200'
+        value={content}
+        type='text'
+        onChange={(e) => setContent(e.target.value)}
+        disabled={isPosting}
       />
+      {isPosting && <LoadingSpinner />}
+      <button
+        className='rounded-md px-2 text-2xl text-violet-50 hover:text-violet-200'
+        onClick={handleSubmit}
+      >
+        Post
+      </button>
     </div>
   )
 }
@@ -53,7 +80,7 @@ const PostView = (props: PostWithUser) => {
           <span>{`@${user.username}`}</span>{' '}
           <span>{`· ${dayjs(post.createdAt).fromNow()}`}</span>
         </div>
-        <span>{post.content}</span>
+        <span className='text-2xl'>{post.content}</span>
       </div>
     </div>
   )
@@ -61,7 +88,7 @@ const PostView = (props: PostWithUser) => {
 
 const Feed = () => {
   const data = api.post.getAll.useQuery()
-  if (data.isLoading || true) return <LoadingSpinner />
+  if (data.isLoading) return <LoadingSpinner />
 
   if (!data.data) return null
 

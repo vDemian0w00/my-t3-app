@@ -34,7 +34,7 @@ export const Spinner = ({
 
 export const LoadingSpinner = () => {
   return (
-    <div className='absolute right-0 top-0 flex h-screen w-screen items-center justify-center'>
+    <div className='absolute right-0 top-0 z-50 flex h-screen w-screen items-center justify-center blur-sm'>
       <Spinner size={8} />
     </div>
   )
