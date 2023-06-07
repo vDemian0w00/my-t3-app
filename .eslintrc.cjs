@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require("path");
+const path = require("path")
 
 /** @type {import("eslint").Linter.Config} */
 const config = {
@@ -7,6 +7,7 @@ const config = {
     {
       extends: [
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:prettier/recommended",
       ],
       files: ["*.ts", "*.tsx"],
       parserOptions: {
@@ -18,9 +19,13 @@ const config = {
   parserOptions: {
     project: path.join(__dirname, "tsconfig.json"),
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "prettier"],
   extends: ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   rules: {
+    indent: ["error", 2],
+    "linebreak-style": ["error", "windows"],
+    quotes: ["error", "single"],
+    semi: ["error", "never"],
     "@typescript-eslint/consistent-type-imports": [
       "warn",
       {
@@ -29,7 +34,13 @@ const config = {
       },
     ],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
   },
-};
+}
 
-module.exports = config;
+module.exports = config
